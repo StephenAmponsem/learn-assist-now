@@ -41,8 +41,9 @@ export const SearchAndFilter = ({ onSearch, onFilter }: SearchAndFilterProps) =>
   };
 
   const handleCourseChange = (course: string) => {
-    setSelectedCourse(course);
-    onFilter({ course, tags: selectedTags, sort: sortBy });
+    const courseValue = course === "all" ? "" : course;
+    setSelectedCourse(courseValue);
+    onFilter({ course: courseValue, tags: selectedTags, sort: sortBy });
   };
 
   const handleSortChange = (sort: string) => {
@@ -88,7 +89,7 @@ export const SearchAndFilter = ({ onSearch, onFilter }: SearchAndFilterProps) =>
             <SelectValue placeholder="All Courses" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Courses</SelectItem>
+            <SelectItem value="all">All Courses</SelectItem>
             <SelectItem value="math101">Mathematics 101</SelectItem>
             <SelectItem value="phys201">Physics 201</SelectItem>
             <SelectItem value="chem101">Chemistry 101</SelectItem>
