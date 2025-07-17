@@ -1,102 +1,107 @@
 import { useState } from "react";
-import { Plus, Search, Filter } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { QuestionCard } from "./QuestionCard";
-
-const mockQuestions = [
-  {
-    id: "1",
-    title: "How to implement recursive functions in Python?",
-    content: "I'm struggling to understand how recursive functions work in Python. Can someone explain with examples?",
-    author: "Sarah Johnson",
-    authorRole: "student" as const,
-    timestamp: "2 hours ago",
-    tags: ["Python", "Programming", "Recursion"],
-    likes: 12,
-    replies: 8,
-    isAnswered: true,
-  },
-  {
-    id: "2", 
-    title: "Database normalization best practices",
-    content: "What are the key principles of database normalization and when should I apply them?",
-    author: "Mike Chen",
-    authorRole: "student" as const,
-    timestamp: "5 hours ago",
-    tags: ["Database", "SQL", "Design"],
-    likes: 7,
-    replies: 3,
-    isAnswered: false,
-  },
-  {
-    id: "3",
-    title: "React hooks vs class components",
-    content: "When should I use React hooks versus traditional class components? What are the trade-offs?",
-    author: "Emma Wilson",
-    authorRole: "student" as const,
-    timestamp: "1 day ago",
-    tags: ["React", "JavaScript", "Frontend"],
-    likes: 15,
-    replies: 12,
-    isAnswered: true,
-  },
-];
+import { QuestionForm } from "./QuestionForm";
+import { SearchAndFilter } from "./SearchAndFilter";
 
 export const QuestionsList = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortBy, setSortBy] = useState("recent");
+  const [filters, setFilters] = useState({});
+  const [userVotes, setUserVotes] = useState<Record<string, "up" | "down">>({});
+
+  const mockQuestions = [
+    {
+      id: "1",
+      title: "How do I solve quadratic equations using the quadratic formula?",
+      content: "I'm struggling with understanding when and how to apply the quadratic formula. Can someone explain the steps with an example?",
+      author: "Sarah Johnson",
+      course: "Mathematics 101",
+      timestamp: "2 hours ago",
+      tags: ["Mathematics", "Algebra", "Equations"],
+      votes: 12,
+      answers: 3,
+      isAnswered: true,
+    },
+    {
+      id: "2",
+      title: "What is the difference between kinetic and potential energy?",
+      content: "I understand the basic definitions, but I'm having trouble with practical applications and calculations.",
+      author: "Mike Chen",
+      course: "Physics 201",
+      timestamp: "5 hours ago",
+      tags: ["Physics", "Energy", "Mechanics"],
+      votes: 8,
+      answers: 2,
+      isAnswered: false,
+    },
+    {
+      id: "3",
+      title: "How to balance chemical equations step by step?",
+      content: "I'm preparing for my chemistry exam and need help understanding the systematic approach to balancing equations.",
+      author: "Emma Davis",
+      course: "Chemistry 101",
+      timestamp: "1 day ago",
+      tags: ["Chemistry", "Equations", "Stoichiometry"],
+      votes: 15,
+      answers: 5,
+      isAnswered: true,
+    },
+    {
+      id: "4",
+      title: "Understanding Big O notation in algorithm analysis",
+      content: "Can someone help me understand how to analyze the time complexity of recursive algorithms?",
+      author: "Alex Kumar",
+      course: "Computer Science 102",
+      timestamp: "3 hours ago",
+      tags: ["Computer Science", "Algorithms", "Complexity"],
+      votes: 6,
+      answers: 1,
+      isAnswered: false,
+    },
+  ];
+
+  const handleVote = (questionId: string, voteType: "up" | "down") => {
+    setUserVotes(prev => ({
+      ...prev,
+      [questionId]: prev[questionId] === voteType ? undefined : voteType
+    }));
+  };
+
+  const handleQuestionClick = (questionId: string) => {
+    console.log("Navigate to question:", questionId);
+    // This would navigate to the question detail page
+  };
 
   return (
     <div className="space-y-6">
-      {/* Header with Actions */}
-      <div className="flex flex-col sm:flex-row gap-4 justify-between">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Questions & Answers</h1>
-          <p className="text-muted-foreground">Ask questions and get help from instructors and peers</p>
+          <h2 className="text-2xl font-bold">Questions & Answers</h2>
+          <p className="text-muted-foreground">
+            Ask questions and get help from the community
+          </p>
         </div>
-        <Button className="w-fit">
-          <Plus className="h-4 w-4 mr-2" />
-          Ask Question
-        </Button>
+        <QuestionForm />
       </div>
 
-      {/* Search and Filters */}
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input 
-            placeholder="Search questions..." 
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-        <div className="flex gap-2">
-          <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger className="w-40">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="recent">Most Recent</SelectItem>
-              <SelectItem value="popular">Most Popular</SelectItem>
-              <SelectItem value="unanswered">Unanswered</SelectItem>
-              <SelectItem value="answered">Answered</SelectItem>
-            </SelectContent>
-          </Select>
-          <Button variant="outline" size="icon">
-            <Filter className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
+      <SearchAndFilter onSearch={setSearchQuery} onFilter={setFilters} />
 
-      {/* Questions List */}
       <div className="space-y-4">
         {mockQuestions.map((question) => (
-          <QuestionCard key={question.id} {...question} />
+          <QuestionCard 
+            key={question.id} 
+            {...question} 
+            userVote={userVotes[question.id] || null}
+            onVote={handleVote}
+            onClick={() => handleQuestionClick(question.id)}
+          />
         ))}
       </div>
+
+      {mockQuestions.length === 0 && (
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">No questions found. Be the first to ask!</p>
+        </div>
+      )}
     </div>
   );
 };

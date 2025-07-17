@@ -1,144 +1,184 @@
-import { BookOpen, MessageCircle, Users, TrendingUp } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { QuestionCard } from "@/components/questions/QuestionCard";
-import { AnnouncementCard } from "@/components/announcements/AnnouncementCard";
-
-const recentQuestions = [
-  {
-    id: "1",
-    title: "How to optimize database queries?",
-    content: "Looking for best practices to improve query performance in PostgreSQL...",
-    author: "Alex Thompson",
-    authorRole: "student" as const,
-    timestamp: "30 min ago",
-    tags: ["Database", "PostgreSQL"],
-    likes: 5,
-    replies: 2,
-    isAnswered: false,
-  },
-  {
-    id: "2",
-    title: "React component lifecycle explained",
-    content: "Can someone break down the React component lifecycle methods?",
-    author: "Maria Garcia",
-    authorRole: "student" as const,
-    timestamp: "1 hour ago",
-    tags: ["React", "JavaScript"],
-    likes: 8,
-    replies: 4,
-    isAnswered: true,
-  },
-];
-
-const recentAnnouncements = [
-  {
-    id: "1",
-    title: "Final Project Guidelines Released",
-    content: "The guidelines for your final project submissions are now available...",
-    instructor: "Dr. Sarah Wilson",
-    course: "Software Engineering",
-    timestamp: "2 hours ago",
-    priority: "high" as const,
-    isPinned: true,
-  },
-  {
-    id: "2",
-    title: "Office Hours Schedule Update",
-    content: "Updated office hours for this week due to conference attendance...",
-    instructor: "Prof. David Kim",
-    course: "Data Science",
-    timestamp: "4 hours ago",
-    priority: "medium" as const,
-    isPinned: false,
-  },
-];
-
-const stats = [
-  {
-    title: "Active Courses",
-    value: "6",
-    icon: BookOpen,
-    description: "Currently enrolled",
-    color: "text-blue-600",
-  },
-  {
-    title: "Questions Asked",
-    value: "23",
-    icon: MessageCircle,
-    description: "This semester",
-    color: "text-green-600",
-  },
-  {
-    title: "Instructors",
-    value: "8",
-    icon: Users,
-    description: "Available for help",
-    color: "text-purple-600",
-  },
-  {
-    title: "Progress",
-    value: "87%",
-    icon: TrendingUp,
-    description: "Course completion",
-    color: "text-orange-600",
-  },
-];
+import { StatsCard } from "./StatsCard";
+import { 
+  MessageCircle, 
+  Users, 
+  BookOpen, 
+  TrendingUp, 
+  Clock,
+  Award,
+  ChevronRight,
+  Target,
+  Star
+} from "lucide-react";
 
 export const Dashboard = () => {
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Welcome Section */}
-      <div>
-        <h1 className="text-3xl font-bold mb-2">Welcome back, Student!</h1>
-        <p className="text-muted-foreground">Here's what's happening in your academic community today.</p>
+      <div className="bg-gradient-to-r from-primary to-primary-glow rounded-lg p-6 text-white">
+        <h1 className="text-3xl font-bold mb-2">Welcome back, John! 👋</h1>
+        <p className="text-primary-foreground/90">
+          Ready to continue your learning journey? You have 3 new notifications and 2 pending assignments.
+        </p>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map((stat) => {
-          const Icon = stat.icon;
-          return (
-            <Card key={stat.title}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
-                <Icon className={`h-4 w-4 ${stat.color}`} />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stat.value}</div>
-                <p className="text-xs text-muted-foreground">{stat.description}</p>
-              </CardContent>
-            </Card>
-          );
-        })}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatsCard
+          title="Questions Asked"
+          value={12}
+          description="This semester"
+          icon={MessageCircle}
+          trend={{ value: 20, label: "from last month", isPositive: true }}
+        />
+        <StatsCard
+          title="Answers Received"
+          value={28}
+          description="Total responses"
+          icon={Award}
+          trend={{ value: 15, label: "response rate", isPositive: true }}
+        />
+        <StatsCard
+          title="Course Progress"
+          value="78%"
+          description="Average completion"
+          icon={Target}
+          trend={{ value: 5, label: "this week", isPositive: true }}
+        />
+        <StatsCard
+          title="Reputation Score"
+          value={156}
+          description="Community points"
+          icon={Star}
+          trend={{ value: 12, label: "this month", isPositive: true }}
+        />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Recent Questions */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Recent Questions</h2>
-            <Button variant="outline" size="sm">View All</Button>
-          </div>
-          <div className="space-y-4">
-            {recentQuestions.map((question) => (
-              <QuestionCard key={question.id} {...question} />
-            ))}
-          </div>
-        </div>
+      {/* Quick Actions */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card className="hover:shadow-md transition-shadow cursor-pointer">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <MessageCircle className="h-5 w-5 text-primary" />
+              Ask a Question
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-3">
+              Get help from instructors and peers
+            </p>
+            <Button className="w-full">
+              Start Asking
+              <ChevronRight className="h-4 w-4 ml-1" />
+            </Button>
+          </CardContent>
+        </Card>
 
-        {/* Recent Announcements */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Latest Announcements</h2>
-            <Button variant="outline" size="sm">View All</Button>
-          </div>
-          <div className="space-y-4">
-            {recentAnnouncements.map((announcement) => (
-              <AnnouncementCard key={announcement.id} {...announcement} />
+        <Card className="hover:shadow-md transition-shadow cursor-pointer">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <BookOpen className="h-5 w-5 text-primary" />
+              Browse Courses
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-3">
+              Explore available courses and materials
+            </p>
+            <Button variant="outline" className="w-full">
+              View Courses
+              <ChevronRight className="h-4 w-4 ml-1" />
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card className="hover:shadow-md transition-shadow cursor-pointer">
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-lg">
+              <Users className="h-5 w-5 text-primary" />
+              Connect with Instructors
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-3">
+              Find and contact your instructors
+            </p>
+            <Button variant="outline" className="w-full">
+              Find Instructors
+              <ChevronRight className="h-4 w-4 ml-1" />
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Recent Activity */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              Recent Questions
+              <Button variant="ghost" size="sm">
+                View All
+                <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {[
+              { title: "How to solve quadratic equations?", time: "2 hours ago", status: "answered" },
+              { title: "Understanding React hooks", time: "5 hours ago", status: "pending" },
+              { title: "Database normalization help", time: "1 day ago", status: "answered" },
+            ].map((item, index) => (
+              <div key={index} className="flex items-center justify-between py-2 border-b last:border-0">
+                <div className="flex-1">
+                  <p className="font-medium text-sm">{item.title}</p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Clock className="h-3 w-3 text-muted-foreground" />
+                    <span className="text-xs text-muted-foreground">{item.time}</span>
+                  </div>
+                </div>
+                <Badge variant={item.status === "answered" ? "success" : "secondary"}>
+                  {item.status}
+                </Badge>
+              </div>
             ))}
-          </div>
-        </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              Latest Announcements
+              <Button variant="ghost" size="sm">
+                View All
+                <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {[
+              { title: "Midterm exam schedule released", course: "Mathematics 101", priority: "high" },
+              { title: "Assignment deadline extended", course: "Physics 201", priority: "medium" },
+              { title: "Guest lecture next week", course: "Computer Science", priority: "low" },
+            ].map((item, index) => (
+              <div key={index} className="flex items-center justify-between py-2 border-b last:border-0">
+                <div className="flex-1">
+                  <p className="font-medium text-sm">{item.title}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{item.course}</p>
+                </div>
+                <Badge variant={
+                  item.priority === "high" ? "destructive" : 
+                  item.priority === "medium" ? "warning" : "secondary"
+                }>
+                  {item.priority}
+                </Badge>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

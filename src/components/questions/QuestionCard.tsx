@@ -1,65 +1,116 @@
-import { MessageCircle, ThumbsUp, Clock, User, Tag } from "lucide-react";
+import { MessageCircle, Clock, User, ThumbsUp, GraduationCap, Award } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 
 interface QuestionCardProps {
   id: string;
   title: string;
   content: string;
   author: string;
-  authorRole: "student" | "instructor";
+  course: string;
   timestamp: string;
   tags: string[];
-  likes: number;
-  replies: number;
-  hasAnswer?: boolean;
+  votes: number;
+  answers: number;
   isAnswered?: boolean;
+  userVote?: "up" | "down" | null;
+  onVote?: (questionId: string, voteType: "up" | "down") => void;
+  onClick?: () => void;
 }
 
 export const QuestionCard = ({
+  id,
   title,
   content,
   author,
-  authorRole,
+  course,
   timestamp,
   tags,
-  likes,
-  replies,
-  hasAnswer = false,
+  votes,
+  answers,
   isAnswered = false,
+  userVote = null,
+  onVote,
+  onClick,
 }: QuestionCardProps) => {
-  return (
-    <Card className="hover:shadow-md transition-shadow">
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex-1">
-            <h3 className="font-semibold text-lg leading-tight mb-2">{title}</h3>
-            <p className="text-muted-foreground text-sm line-clamp-2">{content}</p>
-          </div>
-          {isAnswered && (
-            <Badge variant="default" className="bg-success hover:bg-success/90">
-              Answered
-            </Badge>
-          )}
-        </div>
+  
+  const handleVote = (voteType: "up" | "down") => {
+    onVote?.(id, voteType);
+  };
 
-        {/* Tags */}
-        {tags.length > 0 && (
-          <div className="flex flex-wrap gap-1 mt-2">
-            {tags.map((tag) => (
-              <Badge key={tag} variant="secondary" className="text-xs">
-                <Tag className="h-3 w-3 mr-1" />
-                {tag}
-              </Badge>
-            ))}
+  return (
+    <Card className="hover:shadow-lg transition-all duration-200 cursor-pointer" onClick={onClick}>
+      <CardHeader className="pb-3">
+        <div className="flex items-start gap-4">
+          {/* Vote Section */}
+          <div className="flex flex-col items-center gap-1 pt-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              className={`h-8 w-8 p-0 hover:bg-primary/20 ${
+                userVote === "up" ? "text-primary bg-primary/10" : "text-muted-foreground"
+              }`}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleVote("up");
+              }}
+            >
+              <ThumbsUp className="h-4 w-4" />
+            </Button>
+            <span className={`text-sm font-medium ${
+              votes > 0 ? "text-primary" : votes < 0 ? "text-destructive" : "text-muted-foreground"
+            }`}>
+              {votes}
+            </span>
+            <Button
+              variant="ghost"
+              size="sm"
+              className={`h-8 w-8 p-0 hover:bg-destructive/20 rotate-180 ${
+                userVote === "down" ? "text-destructive bg-destructive/10" : "text-muted-foreground"
+              }`}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleVote("down");
+              }}
+            >
+              <ThumbsUp className="h-4 w-4" />
+            </Button>
           </div>
-        )}
+
+          {/* Content Section */}
+          <div className="flex-1">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex-1">
+                <h3 className="font-semibold text-lg mb-2 leading-tight hover:text-primary">
+                  {title}
+                </h3>
+                <p className="text-muted-foreground text-sm line-clamp-2">{content}</p>
+              </div>
+              
+              {isAnswered && (
+                <Badge variant="success" className="shrink-0">
+                  <Award className="h-3 w-3 mr-1" />
+                  Solved
+                </Badge>
+              )}
+            </div>
+
+            {/* Tags */}
+            <div className="flex flex-wrap gap-2 mt-3">
+              {tags.map((tag) => (
+                <Badge key={tag} variant="outline" className="text-xs">
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        </div>
       </CardHeader>
 
       <CardContent className="pt-0">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between pl-16">
           {/* Author Info */}
           <div className="flex items-center gap-2">
             <Avatar className="h-8 w-8">
@@ -69,27 +120,23 @@ export const QuestionCard = ({
             </Avatar>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <span>{author}</span>
-              <Badge variant={authorRole === "instructor" ? "default" : "secondary"} className="text-xs">
-                {authorRole}
-              </Badge>
               <span>•</span>
-              <div className="flex items-center gap-1">
-                <Clock className="h-3 w-3" />
-                {timestamp}
-              </div>
+              <Badge variant="outline" className="text-xs">
+                {course}
+              </Badge>
             </div>
           </div>
 
-          {/* Actions */}
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" className="h-8 px-2">
-              <ThumbsUp className="h-4 w-4 mr-1" />
-              {likes}
-            </Button>
-            <Button variant="ghost" size="sm" className="h-8 px-2">
-              <MessageCircle className="h-4 w-4 mr-1" />
-              {replies}
-            </Button>
+          {/* Stats */}
+          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+            <div className="flex items-center gap-1">
+              <MessageCircle className="h-3 w-3" />
+              <span>{answers} answers</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Clock className="h-3 w-3" />
+              {timestamp}
+            </div>
           </div>
         </div>
       </CardContent>

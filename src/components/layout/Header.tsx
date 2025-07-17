@@ -2,8 +2,16 @@ import { GraduationCap, Bell, User, Search, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { UserProfile } from "@/components/auth/UserProfile";
 
 export const Header = () => {
+  // Mock user data - in real app this would come from auth context
+  const mockUser = {
+    name: "John Doe",
+    email: "john@university.edu",
+    role: "student" as const,
+    course: "Computer Science"
+  };
   return (
     <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
       <div className="container mx-auto px-4 py-3">
@@ -41,9 +49,7 @@ export const Header = () => {
             </Button>
 
             {/* Profile */}
-            <Button variant="ghost" size="icon">
-              <User className="h-5 w-5" />
-            </Button>
+            <UserProfile user={mockUser} />
 
             {/* Mobile Menu */}
             <Button variant="ghost" size="icon" className="md:hidden">
