@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Plus, BookOpen, Tag } from "lucide-react";
+import { AIQuestionEnhancer } from "@/components/ai/AIQuestionEnhancer";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -33,6 +34,7 @@ export const QuestionForm = () => {
   const [course, setCourse] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [customTag, setCustomTag] = useState("");
+  const [showAIEnhancer, setShowAIEnhancer] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,6 +47,7 @@ export const QuestionForm = () => {
     setCourse("");
     setTags([]);
     setCustomTag("");
+    setShowAIEnhancer(false);
   };
 
   const addTag = (tag: string) => {
@@ -61,6 +64,24 @@ export const QuestionForm = () => {
     if (customTag.trim()) {
       addTag(customTag.trim());
       setCustomTag("");
+    }
+  };
+
+  const handleAITagsSelected = (aiTags: string[]) => {
+    const uniqueTags = Array.from(new Set([...tags, ...aiTags]));
+    setTags(uniqueTags);
+  };
+
+  const handleAICategorySelected = (category: string) => {
+    const courseMap: Record<string, string> = {
+      "Mathematics": "math101",
+      "Physics": "phys201", 
+      "Chemistry": "chem101",
+      "Computer Science": "cs102",
+      "Biology": "bio101"
+    };
+    if (courseMap[category]) {
+      setCourse(courseMap[category]);
     }
   };
 
@@ -115,11 +136,22 @@ export const QuestionForm = () => {
             <Textarea
               placeholder="Describe your question in detail. Include what you've tried and where you're stuck..."
               value={content}
-              onChange={(e) => setContent(e.target.value)}
+              onChange={(e) => {
+                setContent(e.target.value);
+                setShowAIEnhancer(e.target.value.length > 10);
+              }}
               rows={4}
               required
             />
           </div>
+
+          {showAIEnhancer && (
+            <AIQuestionEnhancer
+              questionText={content}
+              onTagsSelected={handleAITagsSelected}
+              onCategorySelected={handleAICategorySelected}
+            />
+          )}
 
           <div>
             <label className="text-sm font-medium mb-2 flex items-center gap-1">
