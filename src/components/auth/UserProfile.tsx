@@ -10,25 +10,25 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
-interface UserProfileProps {
-  user?: {
-    name: string;
-    email: string;
-    role: "student" | "instructor";
-    avatar?: string;
-    course?: string;
+export const UserProfile = () => {
+  const { user, profile, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/auth');
   };
-}
 
-export const UserProfile = ({ user }: UserProfileProps) => {
-  if (!user) {
+  if (!user || !profile) {
     return (
       <div className="flex items-center gap-2">
-        <Button variant="outline" size="sm">
+        <Button variant="outline" size="sm" onClick={() => navigate('/auth')}>
           Sign In
         </Button>
-        <Button size="sm">
+        <Button size="sm" onClick={() => navigate('/auth')}>
           Sign Up
         </Button>
       </div>
@@ -40,9 +40,9 @@ export const UserProfile = ({ user }: UserProfileProps) => {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-10 w-10 rounded-full">
           <Avatar className="h-10 w-10">
-            <AvatarImage src={user.avatar} alt={user.name} />
+            <AvatarImage src={profile.avatar_url || undefined} alt={profile.display_name || user.email} />
             <AvatarFallback className="bg-primary text-primary-foreground">
-              {user.name.split(" ").map(n => n[0]).join("")}
+              {profile.display_name?.split(" ").map(n => n[0]).join("") || user.email?.charAt(0).toUpperCase()}
             </AvatarFallback>
           </Avatar>
         </Button>
@@ -51,22 +51,24 @@ export const UserProfile = ({ user }: UserProfileProps) => {
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-2">
             <div className="flex items-center gap-2">
-              <p className="text-sm font-medium leading-none">{user.name}</p>
-              <Badge variant={user.role === "instructor" ? "default" : "secondary"}>
-                {user.role === "instructor" ? (
+              <p className="text-sm font-medium leading-none">
+                {profile.display_name || user.email}
+              </p>
+              <Badge variant={profile.role === "instructor" ? "default" : "secondary"}>
+                {profile.role === "instructor" ? (
                   <GraduationCap className="h-3 w-3 mr-1" />
                 ) : (
                   <BookOpen className="h-3 w-3 mr-1" />
                 )}
-                {user.role}
+                {profile.role}
               </Badge>
             </div>
             <p className="text-xs leading-none text-muted-foreground">
               {user.email}
             </p>
-            {user.course && (
+            {profile.course && (
               <p className="text-xs text-muted-foreground">
-                {user.course}
+                {profile.course}
               </p>
             )}
           </div>
@@ -81,7 +83,7 @@ export const UserProfile = ({ user }: UserProfileProps) => {
           <span>Settings</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="text-destructive">
+        <DropdownMenuItem className="text-destructive" onClick={handleSignOut}>
           <LogOut className="mr-2 h-4 w-4" />
           <span>Log out</span>
         </DropdownMenuItem>

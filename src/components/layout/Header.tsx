@@ -5,13 +5,6 @@ import { Badge } from "@/components/ui/badge";
 import { UserProfile } from "@/components/auth/UserProfile";
 
 export const Header = () => {
-  // Mock user data - in real app this would come from auth context
-  const mockUser = {
-    name: "John Doe",
-    email: "john@university.edu",
-    role: "student" as const,
-    course: "Computer Science"
-  };
   return (
     <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
       <div className="container mx-auto px-4 py-3">
@@ -49,7 +42,7 @@ export const Header = () => {
             </Button>
 
             {/* Profile */}
-            <UserProfile user={mockUser} />
+            <UserProfile />
 
             {/* Mobile Menu */}
             <Button variant="ghost" size="icon" className="md:hidden">
