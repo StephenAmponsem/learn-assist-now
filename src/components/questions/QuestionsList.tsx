@@ -1,107 +1,132 @@
 import { useState } from "react";
+import { useQuestions } from "@/hooks/useQuestions";
+import { useAuth } from "@/contexts/AuthContext";
 import { QuestionCard } from "./QuestionCard";
 import { QuestionForm } from "./QuestionForm";
 import { SearchAndFilter } from "./SearchAndFilter";
+import { Button } from "@/components/ui/button";
+import { Plus, AlertCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export const QuestionsList = () => {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filters, setFilters] = useState({});
-  const [userVotes, setUserVotes] = useState<Record<string, "up" | "down">>({});
+  const [showForm, setShowForm] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedSubject, setSelectedSubject] = useState("all");
+  const [selectedDifficulty, setSelectedDifficulty] = useState("all");
+  const { questions, loading, error, createQuestion, voteQuestion } = useQuestions();
+  const { user } = useAuth();
 
-  const mockQuestions = [
-    {
-      id: "1",
-      title: "How do I solve quadratic equations using the quadratic formula?",
-      content: "I'm struggling with understanding when and how to apply the quadratic formula. Can someone explain the steps with an example?",
-      author: "Sarah Johnson",
-      course: "Mathematics 101",
-      timestamp: "2 hours ago",
-      tags: ["Mathematics", "Algebra", "Equations"],
-      votes: 12,
-      answers: 3,
-      isAnswered: true,
-    },
-    {
-      id: "2",
-      title: "What is the difference between kinetic and potential energy?",
-      content: "I understand the basic definitions, but I'm having trouble with practical applications and calculations.",
-      author: "Mike Chen",
-      course: "Physics 201",
-      timestamp: "5 hours ago",
-      tags: ["Physics", "Energy", "Mechanics"],
-      votes: 8,
-      answers: 2,
-      isAnswered: false,
-    },
-    {
-      id: "3",
-      title: "How to balance chemical equations step by step?",
-      content: "I'm preparing for my chemistry exam and need help understanding the systematic approach to balancing equations.",
-      author: "Emma Davis",
-      course: "Chemistry 101",
-      timestamp: "1 day ago",
-      tags: ["Chemistry", "Equations", "Stoichiometry"],
-      votes: 15,
-      answers: 5,
-      isAnswered: true,
-    },
-    {
-      id: "4",
-      title: "Understanding Big O notation in algorithm analysis",
-      content: "Can someone help me understand how to analyze the time complexity of recursive algorithms?",
-      author: "Alex Kumar",
-      course: "Computer Science 102",
-      timestamp: "3 hours ago",
-      tags: ["Computer Science", "Algorithms", "Complexity"],
-      votes: 6,
-      answers: 1,
-      isAnswered: false,
-    },
-  ];
-
-  const handleVote = (questionId: string, voteType: "up" | "down") => {
-    setUserVotes(prev => ({
-      ...prev,
-      [questionId]: prev[questionId] === voteType ? undefined : voteType
-    }));
+  const handleCreateQuestion = async (questionData: {
+    title: string;
+    content: string;
+    subject: string;
+    difficulty: 'easy' | 'medium' | 'hard';
+    tags: string[];
+  }) => {
+    try {
+      await createQuestion(questionData);
+      setShowForm(false);
+    } catch (error) {
+      console.error('Error creating question:', error);
+    }
   };
 
-  const handleQuestionClick = (questionId: string) => {
-    console.log("Navigate to question:", questionId);
-    // This would navigate to the question detail page
-  };
+  const filteredQuestions = questions.filter(question => {
+    const matchesSearch = question.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         question.content.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSubject = selectedSubject === "all" || question.subject === selectedSubject;
+    const matchesDifficulty = selectedDifficulty === "all" || question.difficulty === selectedDifficulty;
+    
+    return matchesSearch && matchesSubject && matchesDifficulty;
+  });
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold">Questions</h1>
+          <Skeleton className="h-10 w-32" />
+        </div>
+        <div className="space-y-4">
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-48 w-full" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <h1 className="text-3xl font-bold">Questions</h1>
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            Error loading questions: {error}
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold">Questions & Answers</h2>
-          <p className="text-muted-foreground">
-            Ask questions and get help from the community
-          </p>
-        </div>
-        <QuestionForm />
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold">Questions</h1>
+        {user && (
+          <Button onClick={() => setShowForm(true)}>
+            <Plus className="h-4 w-4 mr-2" />
+            Ask Question
+          </Button>
+        )}
       </div>
 
-      <SearchAndFilter onSearch={setSearchQuery} onFilter={setFilters} />
+      <SearchAndFilter
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        selectedSubject={selectedSubject}
+        onSubjectChange={setSelectedSubject}
+        selectedDifficulty={selectedDifficulty}
+        onDifficultyChange={setSelectedDifficulty}
+      />
+
+      {showForm && (
+        <QuestionForm 
+          onSubmit={handleCreateQuestion}
+          onCancel={() => setShowForm(false)} 
+        />
+      )}
 
       <div className="space-y-4">
-        {mockQuestions.map((question) => (
-          <QuestionCard 
-            key={question.id} 
-            {...question} 
-            userVote={userVotes[question.id] || null}
-            onVote={handleVote}
-            onClick={() => handleQuestionClick(question.id)}
-          />
-        ))}
+        {filteredQuestions.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">No questions found matching your criteria.</p>
+          </div>
+        ) : (
+          filteredQuestions.map((question) => (
+            <QuestionCard 
+              key={question.id} 
+              question={{
+                id: question.id,
+                title: question.title,
+                content: question.content,
+                author: question.profiles?.display_name || 'Anonymous',
+                subject: question.subject,
+                difficulty: question.difficulty,
+                tags: question.tags,
+                timestamp: new Date(question.created_at).toLocaleDateString(),
+                upvotes: question.upvotes,
+                downvotes: question.downvotes,
+                answers: question.answer_count,
+                isResolved: question.is_resolved
+              }}
+              onVote={(type) => voteQuestion(question.id, type as 'up' | 'down')}
+            />
+          ))
+        )}
       </div>
-
-      {mockQuestions.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-muted-foreground">No questions found. Be the first to ask!</p>
-        </div>
-      )}
     </div>
   );
 };

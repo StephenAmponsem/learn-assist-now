@@ -14,6 +14,89 @@ export type Database = {
   }
   public: {
     Tables: {
+      announcements: {
+        Row: {
+          content: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          is_pinned: boolean | null
+          priority: string
+          target_audience: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_pinned?: boolean | null
+          priority?: string
+          target_audience?: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_pinned?: boolean | null
+          priority?: string
+          target_audience?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      answers: {
+        Row: {
+          content: string
+          created_at: string
+          downvotes: number | null
+          id: string
+          is_accepted: boolean | null
+          question_id: string
+          updated_at: string
+          upvotes: number | null
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          downvotes?: number | null
+          id?: string
+          is_accepted?: boolean | null
+          question_id: string
+          updated_at?: string
+          upvotes?: number | null
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          downvotes?: number | null
+          id?: string
+          is_accepted?: boolean | null
+          question_id?: string
+          updated_at?: string
+          upvotes?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       feedback: {
         Row: {
           created_at: string
@@ -58,6 +141,54 @@ export type Database = {
           id?: string
           role?: string | null
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      questions: {
+        Row: {
+          answer_count: number | null
+          content: string
+          created_at: string
+          difficulty: string
+          downvotes: number | null
+          id: string
+          is_resolved: boolean | null
+          subject: string
+          tags: string[] | null
+          title: string
+          updated_at: string
+          upvotes: number | null
+          user_id: string
+        }
+        Insert: {
+          answer_count?: number | null
+          content: string
+          created_at?: string
+          difficulty: string
+          downvotes?: number | null
+          id?: string
+          is_resolved?: boolean | null
+          subject: string
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          upvotes?: number | null
+          user_id: string
+        }
+        Update: {
+          answer_count?: number | null
+          content?: string
+          created_at?: string
+          difficulty?: string
+          downvotes?: number | null
+          id?: string
+          is_resolved?: boolean | null
+          subject?: string
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          upvotes?: number | null
           user_id?: string
         }
         Relationships: []
