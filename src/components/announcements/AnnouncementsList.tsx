@@ -1,55 +1,52 @@
 import { AnnouncementCard } from "./AnnouncementCard";
 import { AnnouncementForm } from "./AnnouncementForm";
+import { useAnnouncements } from "@/hooks/useAnnouncements";
+import { useAuth } from "@/contexts/AuthContext";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 export const AnnouncementsList = () => {
-  const mockAnnouncements = [
-    {
-      id: "1",
-      title: "Midterm Exam Schedule Released",
-      content: "The midterm examination schedule for all courses has been published. Please check your course portals for specific dates and times.",
-      instructor: "Dr. Amanda Rodriguez",
-      course: "Computer Science",
-      timestamp: "1 hour ago",
-      priority: "high" as const,
-      isPinned: true,
-    },
-    {
-      id: "2",
-      title: "Assignment 3 Due Date Extended",
-      content: "Due to technical issues with the submission system, Assignment 3 deadline has been extended to Friday, March 15th at 11:59 PM.",
-      instructor: "Prof. James Liu",
-      course: "Data Structures",
-      timestamp: "3 hours ago",
-      priority: "medium" as const,
-      isPinned: false,
-    },
-    {
-      id: "3",
-      title: "Guest Lecture on Machine Learning",
-      content: "Join us for a special guest lecture by Dr. Sarah Chen from Google AI on 'The Future of Machine Learning in Industry' on March 20th.",
-      instructor: "Dr. Michael Brown",
-      course: "AI & ML",
-      timestamp: "6 hours ago",
-      priority: "low" as const,
-      isPinned: false,
-    },
-    {
-      id: "4",
-      title: "Library Hours Extended During Finals",
-      content: "The university library will extend its operating hours during the final examination period. New hours: 6 AM - 2 AM daily.",
-      instructor: "Library Administration",
-      course: "General",
-      timestamp: "1 day ago",
-      priority: "medium" as const,
-      isPinned: true,
-    },
-  ];
+  const { announcements, loading, error } = useAnnouncements();
+  const { user } = useAuth();
 
-  // Sort pinned announcements first
-  const sortedAnnouncements = [...mockAnnouncements].sort((a, b) => {
-    if (a.isPinned && !b.isPinned) return -1;
-    if (!a.isPinned && b.isPinned) return 1;
-    return 0;
+  const canCreateAnnouncement = user && ['instructor', 'admin'].includes(user.user_metadata?.role || '');
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold">Announcements</h1>
+          <Skeleton className="h-10 w-32" />
+        </div>
+        <div className="space-y-4">
+          {[1, 2, 3].map((i) => (
+            <Skeleton key={i} className="h-32 w-full" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <h1 className="text-3xl font-bold">Announcements</h1>
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            Error loading announcements: {error}
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
+  // Sort announcements to show pinned ones first
+  const sortedAnnouncements = [...announcements].sort((a, b) => {
+    if (a.is_pinned && !b.is_pinned) return -1;
+    if (!a.is_pinned && b.is_pinned) return 1;
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
   });
 
   return (
@@ -61,20 +58,30 @@ export const AnnouncementsList = () => {
             Important updates and information from instructors
           </p>
         </div>
-        <AnnouncementForm />
+        {canCreateAnnouncement && <AnnouncementForm />}
       </div>
 
       <div className="space-y-4">
-        {sortedAnnouncements.map((announcement) => (
-          <AnnouncementCard key={announcement.id} {...announcement} />
-        ))}
+        {sortedAnnouncements.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">No announcements available at the moment.</p>
+          </div>
+        ) : (
+          sortedAnnouncements.map((announcement) => (
+            <AnnouncementCard 
+              key={announcement.id} 
+              id={announcement.id}
+              title={announcement.title}
+              content={announcement.content}
+              instructor={announcement.profiles?.display_name || 'Anonymous'}
+              course={announcement.target_audience}
+              timestamp={new Date(announcement.created_at).toLocaleDateString()}
+              priority={announcement.priority as 'high' | 'medium' | 'low'}
+              isPinned={announcement.is_pinned}
+            />
+          ))
+        )}
       </div>
-
-      {sortedAnnouncements.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-muted-foreground">No announcements found.</p>
-        </div>
-      )}
     </div>
   );
 };

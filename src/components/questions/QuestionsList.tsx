@@ -84,18 +84,17 @@ export const QuestionsList = () => {
       </div>
 
       <SearchAndFilter
-        searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
-        selectedSubject={selectedSubject}
-        onSubjectChange={setSelectedSubject}
-        selectedDifficulty={selectedDifficulty}
-        onDifficultyChange={setSelectedDifficulty}
+        onSearch={setSearchTerm}
+        onFilter={(filters) => {
+          if (filters.course) setSelectedSubject(filters.course);
+          // Handle other filters as needed
+        }}
       />
 
       {showForm && (
         <QuestionForm 
           onSubmit={handleCreateQuestion}
-          onCancel={() => setShowForm(false)} 
+          onCancel={() => setShowForm(false)}
         />
       )}
 
@@ -108,21 +107,17 @@ export const QuestionsList = () => {
           filteredQuestions.map((question) => (
             <QuestionCard 
               key={question.id} 
-              question={{
-                id: question.id,
-                title: question.title,
-                content: question.content,
-                author: question.profiles?.display_name || 'Anonymous',
-                subject: question.subject,
-                difficulty: question.difficulty,
-                tags: question.tags,
-                timestamp: new Date(question.created_at).toLocaleDateString(),
-                upvotes: question.upvotes,
-                downvotes: question.downvotes,
-                answers: question.answer_count,
-                isResolved: question.is_resolved
-              }}
-              onVote={(type) => voteQuestion(question.id, type as 'up' | 'down')}
+              id={question.id}
+              title={question.title}
+              content={question.content}
+              author={question.profiles?.display_name || 'Anonymous'}
+              course={question.subject}
+              timestamp={new Date(question.created_at).toLocaleDateString()}
+              tags={question.tags}
+              votes={question.upvotes - question.downvotes}
+              answers={question.answer_count}
+              isAnswered={question.is_resolved}
+              onVote={(id, type) => voteQuestion(id, type)}
             />
           ))
         )}

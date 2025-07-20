@@ -22,12 +22,23 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+interface QuestionFormProps {
+  onSubmit?: (questionData: {
+    title: string;
+    content: string;
+    subject: string;
+    difficulty: 'easy' | 'medium' | 'hard';
+    tags: string[];
+  }) => Promise<void>;
+  onCancel?: () => void;
+}
+
 const predefinedTags = [
   "Mathematics", "Physics", "Chemistry", "Biology", "Computer Science",
   "History", "Literature", "Economics", "Psychology", "Engineering"
 ];
 
-export const QuestionForm = () => {
+export const QuestionForm = ({ onSubmit, onCancel }: QuestionFormProps = {}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -36,18 +47,30 @@ export const QuestionForm = () => {
   const [customTag, setCustomTag] = useState("");
   const [showAIEnhancer, setShowAIEnhancer] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission
-    console.log({ title, content, course, tags });
-    setIsOpen(false);
-    // Reset form
-    setTitle("");
-    setContent("");
-    setCourse("");
-    setTags([]);
-    setCustomTag("");
-    setShowAIEnhancer(false);
+    
+    const questionData = {
+      title,
+      content,
+      subject: course,
+      difficulty: 'medium' as const,
+      tags
+    };
+    
+    try {
+      await onSubmit?.(questionData);
+      setIsOpen(false);
+      // Reset form
+      setTitle("");
+      setContent("");
+      setCourse("");
+      setTags([]);
+      setCustomTag("");
+      setShowAIEnhancer(false);
+    } catch (error) {
+      console.error('Error submitting question:', error);
+    }
   };
 
   const addTag = (tag: string) => {
@@ -200,7 +223,10 @@ export const QuestionForm = () => {
         </form>
 
         <DialogFooter>
-          <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
+          <Button type="button" variant="outline" onClick={() => {
+            setIsOpen(false);
+            onCancel?.();
+          }}>
             Cancel
           </Button>
           <Button type="submit" onClick={handleSubmit}>
