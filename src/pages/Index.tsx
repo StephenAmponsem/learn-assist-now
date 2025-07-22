@@ -5,9 +5,13 @@ import { Dashboard } from "@/components/dashboard/Dashboard";
 import { QuestionsList } from "@/components/questions/QuestionsList";
 import { AnnouncementsList } from "@/components/announcements/AnnouncementsList";
 import { AIStudyAssistant } from "@/components/ai/AIStudyAssistant";
+import.meta.env.VITE_OPENAI_API_KEY;
 
-const Index = () => {
+
+function Index() {
   const [activeTab, setActiveTab] = useState("home");
+  console.log("Active tab:", activeTab);
+
 
   const renderContent = () => {
     switch (activeTab) {
@@ -47,6 +51,6 @@ const Index = () => {
       </main>
     </div>
   );
-};
+}
 
 export default Index;
